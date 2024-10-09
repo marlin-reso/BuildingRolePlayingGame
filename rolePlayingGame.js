@@ -64,7 +64,7 @@ const monsters =[
 
 //--------------------------------------------
 
-const location
+const location=[
 
     {
         name: "town square",
