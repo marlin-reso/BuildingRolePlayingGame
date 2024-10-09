@@ -32,11 +32,39 @@ const monsters =[
   ];
 
   function goFight(){
+    update(locations[3]);
+    monsterHealth = monsters[fighting].health;
+    monsterName.innerText = monsters[fighting].name;
+    monsterHealthText.innerText = monsterHealth;
+    monsterStats.style.display = "block";
+  
   
   }
+//---------------------------------------------------
+  const darkColorsArr = [
+    "#2C3E50",
+    "#34495E",
+    "#2C2C2C",
+    "#616A6B",
+    "#4A235A",
+    "#2F4F4F",
+    "#0E4B5A",
+    "#36454F",
+    "#2C3E50",
+    "#800020",
+  ];
+
+  function gtRandomIndex(){
+    console.log(Math.floor(darkColorsArr.length * Math.random()));
+  }
+
+  getRandomIndex();
 
 
-const locations=[
+
+//--------------------------------------------
+
+const location
 
     {
         name: "town square",
@@ -55,6 +83,36 @@ const locations=[
         "button text": ["Fight slime", "Fight fanged beast", "Go to town square"],
         "button functions": [fightSlime, fightBeast, goTown],
         text: "You enter the cave. You see some monsters."
+      },
+      {
+        name:"fight",
+        "button text":["Attack","Dodge","Run"],
+        "button functions":[attack,dodge,goTown],
+        text:"You are fighting a monster."
+      },
+      {
+        name: "kill monster",
+        "button text": ["Go to town square", "Go to town square", "Go to town square"],
+        "button functions": [goTown, goTown, easterEgg],
+        text: 'The monster screams "Arg!" as it dies. You gain experience points and find gold.'
+     },
+     {
+        name: "lose",
+        "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+        "button functions": [restart, restart, restart],
+        text: "You die. &#x2620;"
+      },
+      {
+        name: "win",
+        "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+        "button functions": [restart, restart, restart],
+        text: "You defeat the dragon! YOU WIN THE GAME! &#x1F389;"
+      },
+      {
+        name: "easter egg",
+        "button text": ["2","8","Go to town square?"],
+        "button functions": [pickTwo, pickEight, goTown],
+        text: "You find a secret game. Pick a number above. Ten numbers will be randomly chosen between 0 and 10. If the number you choose matches one of the random numbers, you win!"
       }
 
 
@@ -71,13 +129,14 @@ function goStore(){
 }
 
 function update(location){
+    monsterStats.style.display = "none";
     button1.innerText = location["button text"][0];
     button2.innerText = location["button text"][1];
     button3.innerText = location["button text"][2];
     button1.onclick = location["button functions"][0];
     button2.onclick = location["button functions"][1];
     button3.onclick = location["button functions"][2];
-    text.innerText = location.text;
+    text.innerHTML = location.text;
 }
 function fightSlime(){
     fighting =0;
@@ -161,13 +220,135 @@ function goCave(){
 button1.onclick = goStore;
 button2.onclick = goCave;
 button3.onclick = fightDragon;
+
+
 function attack(){
 
+
+    text.innerText = "The "+ monsters[fighting].name + " attacks.";
+    text.innerText += " You attack it with your " + weapons[currentWeaponIndex].name + ".";
+    health -= getMonsterAttackValue(monsters[fighting].level);
+    healthText.innerText = health;
+
+    monsterHealth -= weapons[currentWeaponIndex].power+ Math.floor(Math.random()*xp) + 1;
+    if (isMonsterHit()) {
+        monsterHealth -= weapons[currentWeaponIndex].power + Math.floor(Math.random() * xp) + 1;
+        monsterHealthText.innerText = monsterHealth;
+    }else{
+        text.innerText +=" You miss.";
+      }
+
+    if(health<= 0){
+        lose();
+      }else if(monsterHealth<=0){
+        if(fighting===2){
+            winGame();
+      
+          }else{
+              defeatMonster();
+          }
+      }
+
+      if(Math.random() <= .1 && inventory.length !== 1){
+        text.innerText +=" Your "+ inventory.pop()+ " breaks.";
+        currentWeaponIndex--;
+      }
+
 }
+
+function easterEgg(){
+
+    update(locations[7]);
+  }
+
+function pick(guess){
+    const numbers = [];
+    while (numbers.length < 10) {
+        numbers.push(Math.floor(Math.random() * 11));
+    
+      }
+      text.innerText="You picked "+ guess+ ". Here are the random numbers:\n";
+      for (let i = 0; i < 10; i++) {
+       text.innerText += numbers[i] + "\n"
+  
+  }
+  if (numbers.includes(guess)) {
+    text.innerText += "Right! You win 20 gold!";
+    gold += 20;
+    goldText.innerText = gold;
+} else {
+    text.innerText += "Wrong! You lose 10 health!";
+    health -= 10;
+    healthText.innerText = health;
+    if(health <=0){
+        lose();
+}
+}
+
+function pickTwo(){
+    pick(2);
+  
+  }
+function pickEight(){
+    pick(8);
+  
+  }
+
+
+
+function isMonsterHit() {
+    return Math.random() > 0.2 || health<20;
+}
+
+
+function getMonsterAttackValue(level){
+    const hit = (level * 5) - (Math.floor(Math.random() * xp));
+    console.log(hit);
+    return hit > 0 ? hit : 0;
+
+}
+
+
+
+
+
 function dodge(){
+
+    text.innerText="You dodge the attack from the "+monsters[fighting].name;
   
 }
 
+function defeatMonster(){
+    gold += Math.floor(monsters[fighting].level * 6.7);
+    xp+=monsters[fighting].level;
+    goldText.innerText = gold;
+    xpText.innerText = xp;
+    update(locations[4]);
 
 
+}
+function lose(){
 
+    update(locations[5]);
+  
+}
+
+function winGame(){
+    update(locations[6]);
+  }
+
+function restart() {
+    xp = 0;
+    health = 100;
+    gold = 50;
+    currentWeaponIndex = 0;
+    inventory = ["stick"];
+
+    goldText.innerText = gold;
+    healthText.innerText = health;
+    xpText.innerText = xp;
+
+    goTown();
+}
+
+}
